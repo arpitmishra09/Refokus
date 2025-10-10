@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  refokus-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    container_name: refokus-container
+    restart: unless-stopped
+
+  # Development service (optional)
+  refokus-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5173:5173"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    container_name: refokus-dev-container
+    profiles:
+      - dev
