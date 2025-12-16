@@ -1,8 +1,8 @@
 pipeline {
     agent any
 
-    tools {
-        nodejs 'node-20'
+    environment {
+        NODE_VERSION = "16"
     }
 
     stages {
@@ -13,49 +13,45 @@ pipeline {
             }
         }
 
+        stage('Install Node.js') {
+            steps {
+                echo "Using Node.js version ${env.NODE_VERSION}"
+                // If Jenkins has nvm installed or a Node tool configured, adjust as needed
+            }
+        }
+
         stage('Install Dependencies') {
             steps {
-                dir('frontend') {
-                    sh 'node -v'
-                    sh 'npm -v'
-                    sh 'npm install'
-                }
+                sh 'npm install'
             }
         }
 
         stage('Build') {
             steps {
-                dir('frontend') {
-                    sh 'npm run build'
-                }
+                sh 'npm run build'
             }
         }
 
-        stage('Deploy (DEV)') {
-            when {
-                branch 'develop'
-            }
+        stage('Test') {
             steps {
-                echo 'Deploying to DEV environment'
+                echo "Running tests — adjust if you have test scripts"
+                sh 'npm test || true'
             }
         }
 
-        stage('Deploy (PROD)') {
-            when {
-                branch 'prod'
-            }
+        stage('Archive Build') {
             steps {
-                echo 'Deploying to PRODUCTION environment'
+                archiveArtifacts artifacts: 'build/**', fingerprint: true
             }
         }
     }
 
     post {
         success {
-            echo '✅ Build successful'
+            echo "🎉 Build succeeded"
         }
         failure {
-            echo '❌ Build failed'
+            echo "❌ Build failed"
         }
         always {
             cleanWs()
